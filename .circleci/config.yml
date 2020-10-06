@@ -2,22 +2,24 @@ version: 2
 jobs:
   build:
     docker:
-      - image: openmhealth/openjdk-7-jre
+      - image: exoplatform/jdk:8-ubuntu-1804
 
     steps:
       - checkout
 
       - run: apt update # PHP CircleCI 2.0 Configuration File# PHP CircleCI 2.0 Configuration File sudo apt install zlib1g-dev libsqlite3-dev
-      - run: apt-get install curl
-      - run: curl -s https://getcomposer.org/installer | php
-      - run: mv composer.phar /usr/local/bin/composer
+      - run: apt install curl php-cli php-mbstring git unzip -y
+      - run: curl -sS https://getcomposer.org/installer -o composer-setup.php
+      - run: php composer-setup.php --install-dir=/usr/local/bin --filename=composer
       - run: composer install -n --prefer-dist
 
       - run: 
-          name: install dependencies
+          name: whitesource
           command: | 
             curl -LJO https://github.com/whitesource/fs-agent-distribution/raw/master/standAlone/whitesource-fs-agent.jar
-            curl -LJO https://github.com/whitesource/fs-agent-distribution/raw/master/standAlone/whitesource-fs-agent.config
-            cat whitesource-fs-agent.config | sed -e "s/forceCheckAllDependencies=false/forceCheckAllDependencies=true/" > temp_file.config
-            mv temp_file.config whitesource-fs-agent.config
-            java -jar whitesource-fs-agent.jar -apiKey 41c71f81b00e4ec5868fece050113260fa23031c6fac460a81945a99bfaeea51 -product mytest -c whitesource-fs-agent.config -d . -project nextcloud-server
+            ls
+            java -jar whitesource-fs-agent.jar -c wss-unified-agent.config -d . 
+      - run:
+          name: scantist
+          command: |
+            bash <(curl -s https://scripts.scantist.com/staging/ci-circle.sh)
