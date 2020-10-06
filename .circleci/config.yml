@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/php:latest
+      - image: jkarkoszka/apache-php-java
 
     steps:
       - checkout
